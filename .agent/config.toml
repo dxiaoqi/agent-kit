@@ -1,0 +1,154 @@
+# agent-kit configuration
+# Copy this to your project root as .agent/config.toml
+
+# Default model profile to use
+defaultModel = "default"
+
+# ── Model Profiles ────────────────────────────────────────────────
+# Define as many profiles as you need.
+# apiKey can also be set via MODEL_<NAME>_API_KEY or API_KEY env var.
+
+[models.default]
+name          = "gemini-2.5-flash"
+baseUrl       = "https://api.openai.com/v1"
+# apiKey via API_KEY env var or MODEL_DEFAULT_API_KEY env var
+temperature   = 0.7
+contextWindow = 128000
+
+
+# Example: second model profile (Anthropic)
+# [models.claude]
+# name          = "claude-sonnet-4-20250514"
+# provider      = "anthropic"       # openai | anthropic | custom-openai
+# contextWindow = 200000
+# maxTokens     = 8192
+# # apiKey via MODEL_CLAUDE_API_KEY env var
+
+# ── Agent Behaviour ───────────────────────────────────────────────
+approval = "confirm"     # auto | confirm | deny
+maxTurns = 0            # 0 = unlimited
+# workflow = "code"      # Activate a workflow at startup: code | research | (omit for none)
+
+# ── Model Role Bindings ───────────────────────────────────────────
+# Map system roles to specific profiles.
+# Omit a key to fall back to defaultModel.
+[modelBindings]
+compaction = "default"   # used when summarizing long contexts
+subagent   = "default"   # used by sub-agents
+# main     = "claude"    # override main agent model
+
+# ── Predefined Sub-agents ─────────────────────────────────────────
+# Pre-configure named sub-agent types with specific model, tools, and behavior.
+# These can be referenced by type name in DAG definitions.
+#
+# [[subagents]]
+# name         = "researcher"
+# description  = "Read-only research agent using Claude"
+# model        = "claude"          # references [models.claude] profile
+# allowedTools = ["read_file", "grep", "glob", "bash"]
+# maxTurns     = 30
+#
+# [[subagents]]
+# name         = "coder"
+# description  = "Fast coding agent using Gemini Flash"
+# model        = "default"         # references [models.default] profile
+# allowedTools = ["read_file", "write_file", "edit_file", "bash", "grep", "glob"]
+# maxTurns     = 50
+
+# ── Skills ────────────────────────────────────────────────────────
+# Directories to scan for SKILL.md files.
+# Default: [".agent/skills"]
+# skillDirs = [".agent/skills", "~/.agent-kit/skills"]
+
+# ── Sandbox (aligned with Claude Code) ────────────────────────────
+# OS-level process sandbox for bash commands.
+# Platform support:
+#   macOS  — Seatbelt (sandbox-exec, built-in)
+#   Linux  — bubblewrap (apt install bubblewrap socat)
+#   WSL2   — bubblewrap (same as Linux)
+#   Windows — Docker (fallback)
+#
+# Permissions modes:
+#   auto-allow — sandboxed commands auto-approved, no permission prompts
+#   default    — all commands go through standard permission flow
+
+[sandbox]
+enabled                  = true
+permissions              = "auto-allow"    # auto-allow | default
+preferStrategy           = "native"        # native | docker
+allowUnsandboxedCommands = true            # allow dangerouslyDisableSandbox escape hatch
+excludedCommands         = ["docker", "podman", "nerdctl"]  # commands that bypass sandbox
+
+# Filesystem isolation
+# Path prefixes: // = absolute, ~/ = home, ./ = relative to cwd
+[sandbox.filesystem]
+# allowWrite = ["~/.kube", "//tmp/build"]  # extra writable paths (cwd always writable)
+# denyWrite  = ["~/.ssh", "~/.gnupg"]      # deny write even if in allowWrite
+# denyRead   = ["~/.aws/credentials"]      # deny read access entirely
+
+# Network isolation
+[sandbox.network]
+# allowedDomains = ["registry.npmjs.org", "pypi.org", "github.com"]
+# allowManagedDomainsOnly = false  # true = auto-block non-whitelisted, false = prompt user
+# httpProxyPort  = 0   # custom HTTP proxy port (0 = disabled)
+# socksProxyPort = 0   # custom SOCKS proxy port (0 = disabled)
+
+# Docker fallback (used when native sandbox unavailable)
+# [sandbox.docker]
+# image       = "node:20-slim"
+# pullOnStart = false
+# memoryLimit = "512m"
+# cpuLimit    = 1
+# extraArgs   = []
+
+# ── Optional Instructions ─────────────────────────────────────────
+# userInstructions = "Always reply in Chinese."
+
+# ── Permission Rules (权限规则) ──────────────────────────────────
+# 静态权限规则，决定特定工具/路径/命令是否放行。
+# action: "allow" | "deny"
+# toolName: 工具名（"*" 匹配所有）
+# pathPattern: glob 路径模式（可选）
+# commandPrefix: 命令前缀（可选，支持尾部 * 通配）
+#
+# 示例:
+
+# 允许所有 src/ 下的文件编辑
+# [[permission_rules]]
+# action      = "allow"
+# toolName    = "edit_file"
+# pathPattern = "src/**"
+
+# 禁止删除 dist 目录
+# [[permission_rules]]
+# action         = "deny"
+# toolName       = "bash"
+# commandPrefix  = "rm -rf dist"
+
+# ── Safety Rules (危险行为扩展) ──────────────────────────────────
+# 自定义安全规则，扩展内置的命令/路径检测。
+# type: "dangerous_command" | "sensitive_path" | "safe_command"
+# pattern: 正则表达式字符串（dangerous/sensitive）或命令前缀（safe）
+# risk: "moderate" | "high"（仅 dangerous_command / sensitive_path 有效）
+#
+# 示例:
+
+# 禁止 terraform destroy
+# [[safety_rules]]
+# type     = "dangerous_command"
+# pattern  = "\\bterraform\\s+destroy\\b"
+# category = "terraform-destroy"
+# risk     = "high"
+
+# 保护 Kubernetes 配置文件
+# [[safety_rules]]
+# type     = "sensitive_path"
+# pattern  = "\\.kube/config$"
+# category = "kube-config"
+# risk     = "high"
+
+# 白名单：cargo 只读操作
+# [[safety_rules]]
+# type     = "safe_command"
+# pattern  = "cargo check"
+# category = "cargo-check"

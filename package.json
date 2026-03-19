@@ -1,0 +1,57 @@
+{
+  "name": "agent-kit",
+  "version": "0.1.0",
+  "description": "Multi-model CLI agent template",
+  "type": "module",
+  "bin": {
+    "agent": "dist/main.js"
+  },
+  "scripts": {
+    "dev": "tsx src/main.ts",
+    "build": "tsc",
+    "start": "node dist/main.js",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:bench": "vitest bench",
+    "benchmark": "tsx tests/benchmark/run.ts",
+    "benchmark:compare": "tsx tests/benchmark/run.ts --compare"
+  },
+  "keywords": [
+    "ai",
+    "agent",
+    "llm",
+    "cli"
+  ],
+  "license": "MIT",
+  "dependencies": {
+    "ansi-escapes": "^7.3.0",
+    "chalk": "^5.3.0",
+    "cli-highlight": "^2.1.11",
+    "commander": "^12.0.0",
+    "concurrently": "^9.2.1",
+    "create-vite": "^9.0.3",
+    "figures": "^6.1.0",
+    "ink": "^5.2.1",
+    "marked": "^15.0.12",
+    "openai": "^4.28.0",
+    "ora": "^8.0.1",
+    "react": "^18.3.1",
+    "toml": "^3.0.0",
+    "wrap-ansi": "^9.0.2",
+    "zod": "^3.22.4"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.0",
+    "@types/react": "^18.3.28",
+    "tsx": "^4.7.0",
+    "typescript": "^5.3.3",
+    "vitest": "^1.6.0"
+  },
+  "main": "index.js",
+  "directories": {
+    "doc": "docs",
+    "test": "tests"
+  },
+  "author": ""
+}

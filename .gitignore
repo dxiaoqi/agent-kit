@@ -1,0 +1,32 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Environment & secrets
+.env
+.env.local
+
+# Runtime data (session-specific, not project config)
+.agent/transcripts/
+.agent/plans/
+
+# Reference codebases (study material, not part of this project)
+origin/
+
+# Test artifacts from plan execution
+backend/
+frontend/
+fullstack-app/
+
+# Editor
+*.swp
+*.swo
+*~
+.vscode/
+.idea/
